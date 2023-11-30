@@ -1,36 +1,60 @@
 import * as React from 'react';
-import {Box, Grid} from "@mui/material";
-import {useFetchData} from "../../services/fetchData";
-
-import ReceiptsTable from "./receiptsTable";
-import ReceiptsStats from './receiptsStats';
-import TotalOrdersBarChart from './totalOrdersBarChart';
+import { Box, Grid, TextField, Typography, Button } from "@mui/material";
+import {useState} from "react";
 
 function Home() {
-  // const url = "http://localhost:8080/receipts";
-  const url = "https://api.theguai.com/receipts";
-  const {data, loading, error} = useFetchData(url);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchResults, setSearchResults] = React.useState('');
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+    setLoading(true);
+
+    // Add a temp 3-second delay
+    setTimeout(() => {
+      console.log("Search Submitted:", searchQuery);
+      setLoading(false);
+
+      // Temporary response message
+      let res = "Your prompt was: " + searchQuery;
+      res += ". Service is currently under maintenance. Come back later.";
+      setSearchResults(res); // Set the temporary response message as search results
+    }, 3000); // 3000 milliseconds = 3 seconds
+  };
 
   return (
     <>
       <Grid container spacing={2} justifyContent="center">
-        <ReceiptsStats data={data} loading={loading} />
-      </Grid>
-      <Grid container spacing={2} justifyContent="center" sx={{ display: 'flex', alignItems: 'stretch' }}>
-        <Grid item xs={12} md={12} lg={6}>
-          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-            <ReceiptsTable data={data} loading={loading} error={error}/>
+        <Grid item xs={12}>
+          <Box component="form" onSubmit={handleSearchSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
+            <TextField
+              label="Enter your prompt"
+              variant="outlined"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{ width: '100%', maxWidth: 500 }} // Adjust width as needed
+            />
+            <Button type="submit" variant="contained" sx={{ mt: 2 }}>Search</Button>
           </Box>
         </Grid>
-        <Grid item xs={12} md={12} lg={6}>
-          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-            <TotalOrdersBarChart data={data} loading={loading} error={error}/>
+        <Grid container item xs={12}>
+          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
+            {/* Results Box */}
+            {loading && <Typography>Loading...</Typography>}
+            {error && <Typography>Error: {error.message}</Typography>}
+            {!loading && !error && <Typography>{searchResults}</Typography>}
           </Box>
         </Grid>
       </Grid>
     </>
-
   );
 }
 
-export default Home
+export default Home;
