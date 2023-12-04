@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Grid, TextField, Typography, Button } from "@mui/material";
+import { Box, Grid, TextField, Typography, Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
 
 function ChatBot() {
@@ -14,10 +14,9 @@ function ChatBot() {
   };
 
   const handleSubmit = (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
     setLoading(true);
 
-    // Add the user query to the conversation
     setConversation(prev => [...prev, { type: 'user', text: inputQuery }]);
 
     // Add a temp 3-second delay
@@ -28,17 +27,26 @@ function ChatBot() {
       let response = "Your prompt was: " + inputQuery;
       response += ". Service is currently under maintenance. Come back later.";
 
-      // Add the bot response to the conversation
       setConversation(prev => [...prev, { type: 'bot', text: response }]);
-
-      // Clear the input field
       setInputQuery('');
-    }, 3000); // 3000 milliseconds = 3 seconds
+    }, 3000);
   };
 
   return (
     <>
       <Grid container spacing={2} justifyContent="center">
+        {conversation.length > 0 && (
+          <Grid item xs={12}>
+            <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
+              {conversation.map((message, index) => (
+                <Typography key={index} color={message.type === 'bot' ? 'primary' : 'secondary'}>
+                  {message.text}
+                </Typography>
+              ))}
+            </Box>
+          </Grid>
+        )}
+
         <Grid item xs={12}>
           <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
             <TextField
@@ -46,19 +54,11 @@ function ChatBot() {
               variant="outlined"
               value={inputQuery}
               onChange={handleInputChange}
-              sx={{ width: '100%', maxWidth: 500 }} // Adjust width as needed
+              disabled={loading}
+              sx={{ width: '100%', maxWidth: 500 }}
             />
-            <Button type="submit" variant="contained" sx={{ mt: 2 }}>Send</Button>
-          </Box>
-        </Grid>
-        <Grid container item xs={12}>
-          <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
-            {/* Conversation Box */}
-            {conversation.map((message, index) => (
-              <Typography key={index} color={message.type === 'bot' ? 'primary' : 'secondary'}>
-                {message.text}
-              </Typography>
-            ))}
+            <Button type="submit" variant="contained" sx={{ mt: 2 }} disabled={loading}>Send</Button>
+            {loading && <CircularProgress sx={{ mt: 2 }} />}
           </Box>
         </Grid>
       </Grid>
