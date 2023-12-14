@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Grid, TextField, Typography, Button, CircularProgress, Input } from "@mui/material";
 import { useState } from "react";
+import { useFileUpload } from "../../services/fileUpload"; // Make sure the path is correct
 
 function ChatBot() {
   const [error, setError] = useState(null);
@@ -10,6 +11,8 @@ function ChatBot() {
   const [file, setFile] = useState(null);
   const [conversation, setConversation] = useState([]);
 
+  const { uploadFile, response, loading: UploadLoading, error: UploadError } = useFileUpload();
+
   const handleInputChange = (event) => {
     setInputQuery(event.target.value);
   };
@@ -18,11 +21,10 @@ function ChatBot() {
     setFile(event.target.files[0]);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
     setLoading(true);
 
-    // Handle text query submission
     if (inputQuery) {
       // Add the user query to the conversation
       setConversation(prev => [...prev, { type: 'user', text: inputQuery }]);
@@ -43,12 +45,18 @@ function ChatBot() {
       }, 3000); // 3000 milliseconds = 3 seconds
     }
 
-    // Handle file upload
     if (file) {
-      // Implement file handling logic here
-      console.log("File uploaded:", file.name);
-      // Add file upload message to conversation
-      setConversation(prev => [...prev, { type: 'user', text: `File uploaded: ${file.name}` }]);
+      console.log(`file name: ${file.name}`)
+      // Call the uploadFile function from the hook
+      await uploadFile(file, 'http://127.0.0.1:5000/upload/pdf'); // Replace with your actual endpoint
+
+      if (error) {
+        setConversation(prev => [...prev, { type: 'bot', text: `Error uploading file: ${file.name}. ${error}` }]);
+      } else if (responseF) {
+        setConversation(prev => [...prev, { type: 'bot', text: `File ${file.name} uploaded successfully.` }]);
+        // Handle additional response logic if needed
+      }
+
       setFile(null); // Clear the file input
     }
   };
