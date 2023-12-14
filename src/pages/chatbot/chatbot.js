@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Grid, TextField, Typography, Button, CircularProgress, Input } from "@mui/material";
-import { useState } from "react";
 import { useFileUpload } from "../../services/fileUpload"; // Make sure the path is correct
 
 function ChatBot() {
@@ -11,7 +11,23 @@ function ChatBot() {
   const [file, setFile] = useState(null);
   const [conversation, setConversation] = useState([]);
 
-  const { uploadFile, response, loading: UploadLoading, error: UploadError } = useFileUpload();
+  const { uploadFile, response, loading:UploadLoading, error: UploadError } = useFileUpload();
+
+  useEffect(() => {
+    if (UploadError) {
+      console.log(UploadError.message);
+      setConversation(prev => [...prev, { type: 'bot', text: `Error uploading file: ${UploadError}` }]);
+    } else if (response) {
+      console.log(response);
+      const responseText = response.lines || "File uploaded successfully."; // Adjust based on your actual response structure
+      setConversation(prev => [...prev, { type: 'bot', text: `Response: ${responseText}` }]);
+    }
+
+    if (response || UploadError) {
+      setFile(null);
+      setLoading(false);
+    }
+  }, [UploadError, response]);
 
   const handleInputChange = (event) => {
     setInputQuery(event.target.value);
@@ -46,18 +62,8 @@ function ChatBot() {
     }
 
     if (file) {
-      console.log(`file name: ${file.name}`)
-      // Call the uploadFile function from the hook
-      await uploadFile(file, 'http://127.0.0.1:5000/upload/pdf'); // Replace with your actual endpoint
-
-      if (error) {
-        setConversation(prev => [...prev, { type: 'bot', text: `Error uploading file: ${file.name}. ${error}` }]);
-      } else if (responseF) {
-        setConversation(prev => [...prev, { type: 'bot', text: `File ${file.name} uploaded successfully.` }]);
-        // Handle additional response logic if needed
-      }
-
-      setFile(null); // Clear the file input
+      console.log(`file name: ${file.name}`);
+      await uploadFile(file, 'https://api.theguai.com/upload/pdf'); // Replace with your actual endpoint
     }
   };
 

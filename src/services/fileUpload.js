@@ -21,13 +21,16 @@ export const useFileUpload = () => {
         // as the browser sets it automatically with the correct boundary string
       });
 
+      const responseData = await response.json(); // Assuming the server always returns a JSON response
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // If response status is not OK, throw error with server's response message
+        throw new Error(responseData.message || `HTTP error status: ${response.status}`);
       }
 
-      const responseData = await response.json(); // or .text() if your server returns plain text
       setResponse(responseData);
     } catch (error) {
+      // Handle fetch errors or custom errors thrown above
       setError(error.message);
     } finally {
       setLoading(false);
