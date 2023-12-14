@@ -35,7 +35,7 @@ function Home() {
         <Grid item xs={12}>
           <Box component="form" onSubmit={handleSearchSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
             <TextField
-              label="Enter your prompt"
+              label="Enter your single prompt"
               variant="outlined"
               value={searchQuery}
               onChange={handleSearchChange}
